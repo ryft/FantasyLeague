@@ -1,0 +1,7 @@
+%layout 'wrapper', title => 'Standings';
+            <!--<table ng-controller="StandingsCtrl" split="<%= $split %>" ng-init="split = <%= $split %>" class="table">-->
+            <canvas ng-controller="ChartCtrl" id="line" class="chart chart-line" data="data"
+                labels="labels" legend="true" series="series"
+                click="onClick">
+            </canvas>
+

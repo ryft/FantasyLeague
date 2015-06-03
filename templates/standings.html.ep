@@ -1,0 +1,32 @@
+%layout 'wrapper', title => 'Standings';
+            <table ng-controller="StandingsCtrl" split="<%= $split %>" ng-init="split = <%= $split %>" class="table">
+                <thead>
+                    <tr>
+                        <th><a href="" ng-click="predicate='name';    reverse=!reverse">Summoner</a></th>
+                    % if ($split == 0) {
+                        <th><a href="" ng-click="predicate='splits';  reverse=!reverse">Splits</th>
+                    % }
+                        <th><a href="" ng-click="predicate='won';     reverse=!reverse">Wins</th>
+                        <th><a href="" ng-click="predicate='tied';    reverse=!reverse">Ties</th>
+                        <th><a href="" ng-click="predicate='lost';    reverse=!reverse">Losses</th>
+                        <th><a href="" ng-click="predicate='pf';      reverse=!reverse">Points For</th>
+                        <th><a href="" ng-click="predicate='pa';      reverse=!reverse">Points Against</th>
+                        <th><a href="" ng-click="predicate='pd';      reverse=!reverse">Points Difference</th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr ng-repeat="s in standings | orderBy:predicate:reverse">
+                        <td>{{ s.name }}</td>
+                    % if ($split == 0) {
+                        <td>{{ s.splits     | number }}</td>
+                    % }
+                        <td>{{ s.won        | number }}</td>
+                        <td>{{ s.tied       | number }}</td>
+                        <td>{{ s.lost       | number }}</td>
+                        <td>{{ s.pf         | number:2 }}</td>
+                        <td>{{ s.pa         | number:2 }}</td>
+                        <td>{{ s.pd         | number:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
