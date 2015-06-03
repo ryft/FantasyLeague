@@ -1,0 +1,24 @@
+{
+  "name": "FantasyLeague",
+  "homepage": "https://github.com/ryft/FantasyLeague",
+  "authors": [
+    "James Nicholls"
+  ],
+  "description": "Web app for storing and displaying Fantasy LCS stats",
+  "main": [
+    "public/js/salt.js"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.0",
+    "angular-chart.js": "~0.7.1",
+    "bootswatch": "~3.3.4+1"
+  }
+}

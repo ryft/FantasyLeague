@@ -5,17 +5,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>The Salt Machine</title>
 
-        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">-->
-        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">-->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/flatly/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/angular-chart.css">
+        <link rel="stylesheet" href="/bootswatch/flatly/bootstrap.min.css">
+        <link rel="stylesheet" href="/angular-chart.js/dist/angular-chart.css">
         
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
-        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="/angular/angular.min.js"></script>
+        <script src="/jquery/dist/jquery.min.js"></script>
 
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-        <script src="/js/Chart.min.js"></script>
-        <script src="/js/angular-chart.min.js"></script>
+        <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="/Chart.js/Chart.min.js"></script>
+        <script src="/angular-chart.js/dist/angular-chart.min.js"></script>
         <script src="/js/salt.js"></script>
     </head>
     <body>
