@@ -12,6 +12,7 @@ use YAML::XS qw/LoadFile/;
 use Mojolicious::Lite;
 
 Readonly my $CONFIG => 'config.yaml';
+Readonly my $DEFAULT_METRIC => 'won';
 Readonly my %METRICS => {
     won     => 'Matches Won',
     tied    => 'Matches Tied',
@@ -28,6 +29,11 @@ my $dbh = DBI->connect("dbi:mysql:$db_cfg->{database}",
     $db_cfg->{password},
     { mysql_auto_reconnect => 1 }
 ) or die $DBI::errstr;
+
+sub metric_name {
+    my $metric = shift;
+    return $METRICS{$metric} || $METRICS{$DEFAULT_METRIC};
+}
 
 sub splits {
     return $dbh->selectall_arrayref(q{
@@ -87,9 +93,7 @@ sub data_series {
     my $normalise = 0;
 
     # Ensure metric is valid
-    warn $metric;
-    $METRICS{$metric} or $metric = 'won';
-    warn $metric;
+    $METRICS{$metric} or $metric = $DEFAULT_METRIC;
     
     # Filter by split if provided and valid
     my ($split_filter, @params) = ('1');
@@ -195,8 +199,8 @@ sub data_series {
 get '/standings/'           => sub { my $c = shift; $c->stash(page => 'standings', split => 0); $c->render(template => 'standings') };
 get '/standings/*split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 
-get '/graph/:metric/'           => sub { my $c = shift; $c->stash(page => 'graphs', split => 0); $c->render(template => 'graph') };
-get '/graph/:metric/:split'     => sub { my $c = shift; $c->stash(page => 'graphs'); $c->render(template => 'graph') };
+get '/graph/:metric/'           => sub { my $c = shift; $c->stash(page => 'graphs', title => metric_name($c->param('metric')), split => 0); $c->render(template => 'graph') };
+get '/graph/:metric/:split'     => sub { my $c = shift; $c->stash(page => 'graphs', title => metric_name($c->param('metric'))); $c->render(template => 'graph') };
 
 get '/api/standings'        => sub { my $c = shift; $c->render(json => standings()) };
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
