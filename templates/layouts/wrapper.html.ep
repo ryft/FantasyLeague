@@ -34,7 +34,7 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li class="<%= ($page eq 'standings') ? 'active' : '' %>"><a href="/standings/<%= $split %>">Standings</a></li>
+                        <li class="<%= 'active' if ($page eq 'standings') %>"><a href="/standings/<%= $split %>">Standings</a></li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Summoners <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
@@ -44,24 +44,24 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Graphs <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li class="dropdown-header">Matches</li>
-                                <li class="<%= $page eq 'graph/won' ? 'active' : '' %>"><a href="/graph/won/<%= $split %>">Wins</a></li>
-                                <li class="<%= $page eq 'graph/tied' ? 'active' : '' %>"><a href="/graph/tied/<%= $split %>">Ties</a></li>
-                                <li class="<%= $page eq 'graph/lost' ? 'active' : '' %>"><a href="/graph/lost/<%= $split %>">Losses</a></li>
+                                <li class="dropdown-header">Match Counts</li>
+                                <li class="<%= 'active' if ($page eq 'graph/won') %>" ><a href="/graph/won/<%= $split %>" >Match Wins</a></li>
+                                <li class="<%= 'active' if ($page eq 'graph/tied') %>"><a href="/graph/tied/<%= $split %>">Match Ties</a></li>
+                                <li class="<%= 'active' if ($page eq 'graph/lost') %>"><a href="/graph/lost/<%= $split %>">Match Losses</a></li>
                                 <li class="divider"></li>
                                 <li class="dropdown-header">Points Totals</li>
-                                <li class="<%= $page eq 'graph/pf' ? 'active' : '' %>"><a href="/graph/pf/<%= $split %>">Points For</a></li>
-                                <li class="<%= $page eq 'graph/pa' ? 'active' : '' %>"><a href="/graph/pa/<%= $split %>">Points Against</a></li>
-                                <li class="<%= $page eq 'graph/pd' ? 'active' : '' %>"><a href="/graph/pd/<%= $split %>">Points Difference</a></li>
+                                <li class="<%= 'active' if ($page eq 'graph/pf') %>"><a href="/graph/pf/<%= $split %>">Points For</a></li>
+                                <li class="<%= 'active' if ($page eq 'graph/pa') %>"><a href="/graph/pa/<%= $split %>">Points Against</a></li>
+                                <li class="<%= 'active' if ($page eq 'graph/pd') %>"><a href="/graph/pd/<%= $split %>">Points Difference</a></li>
                             </ul>
                         </li>
                     </ul>
                     <div class="nav navbar-nav navbar-right navbar-form form-inline">
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default <%= ($split == 0) ? 'active' : '' %>" onclick="window.location='/<%= $page %>/0'">All splits</button>
-                            <button type="button" class="btn btn-default <%= ($split == 1) ? 'active' : '' %>" onclick="window.location='/<%= $page %>/1'">Summer 14</button>
-                            <button type="button" class="btn btn-default <%= ($split == 2) ? 'active' : '' %>" onclick="window.location='/<%= $page %>/2'">Spring 15</button>
-                            <button type="button" class="btn btn-default <%= ($split == 3) ? 'active' : '' %>" onclick="window.location='/<%= $page %>/3'">Summer 15</button>
+                            <button type="button" class="btn btn-default <%= 'active' if ($split == 0) %>" onclick="window.location='/<%= $page %>/0'">All splits</button>
+                            <button type="button" class="btn btn-default <%= 'active' if ($split == 1) %>" onclick="window.location='/<%= $page %>/1'">Summer 14</button>
+                            <button type="button" class="btn btn-default <%= 'active' if ($split == 2) %>" onclick="window.location='/<%= $page %>/2'">Spring 15</button>
+                            <button type="button" class="btn btn-default <%= 'active' if ($split == 3) %>" onclick="window.location='/<%= $page %>/3'">Summer 15</button>
                         </div>
                     </div>
                 </div>

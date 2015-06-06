@@ -1,5 +1,12 @@
 %layout 'wrapper';
-            <div ng-controller="ChartCtrl" metric="<%= $metric %>" split="<%= $split %>">
+            <div ng-controller="ChartCtrl"
+                metric="<%= $metric %>"
+                split="<%= $split %>"
+                aggregation="<%= $aggregation %>"
+                normalise="<%= $normalise %>"
+                moving-average="<%= $moving_average %>"
+                total-weeks="<%= $total_weeks %>"
+                >
 
                 <div class="well well--params">
                     <span class="caret indicator"></span>
@@ -7,19 +14,21 @@
                     <div class="collapse" id="params">
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox"> Normalise values
+                                <input type="checkbox" ng-model="normalise"> Normalise values
                             </label>
                         </div>
                         <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-default">Raw values</button>
-                            <button type="button" class="btn btn-default">Cumulative</button>
-                            <button type="button" class="btn btn-default">Mean deviation</button>
+                            <button type="button" class="btn btn-default" ng-class="{ 'active' : aggregation == 'raw' }" ng-click="aggregation = 'raw'">Raw values</button>
+                            <button type="button" class="btn btn-default" ng-class="{ 'active' : aggregation == 'cumulative' }" ng-click="aggregation = 'cumulative'">Cumulative</button>
+                            <button type="button" class="btn btn-default" ng-class="{ 'active' : aggregation == 'deviation' }" ng-click="aggregation = 'deviation'">Mean deviation</button>
                         </div>
-                        <p>Moving average length</p>
-                        <span id="slider">
-                            <slider ng-model="movingAverageLength" min="'1'" max="'21'" tooltip="hide"></slider>
-                            <label class="pull-right" ng-bind="movingAverageLength"></label>
-                        </slider>
+                        <div ng-show="aggregation == 'deviation'">
+                            <p>Moving average length</p>
+                            <span class="slider-container">
+                                <slider id="slider" ng-model="movingAverage" max="totalWeeks" tooltip="hide"></slider>
+                                <label class="pull-right" ng-bind="movingAverage"></label>
+                            </span>
+                        </div>
                     </div>
                 </div>
 

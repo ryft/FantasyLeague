@@ -29,7 +29,7 @@
     color: #959595;
 }
 
-#slider * {
+.slider-container * {
     display: inline-block;
 }
 

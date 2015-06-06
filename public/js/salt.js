@@ -12,16 +12,28 @@ app.controller('StandingsCtrl', function($scope, $attrs, $http) {
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
-    $scope.movingAverageLength = 12;
+    $scope.aggregation   = $attrs.aggregation;
+    $scope.normalise     = $attrs.normalise ? true : false;
+    $scope.movingAverage = parseInt($attrs.movingAverage);
+    $scope.totalWeeks    = parseInt($attrs.totalWeeks);
 
+    $scope.reloadGraph = function() {
+        var api_url = '/api/' + $attrs.metric + '/' + $attrs.split + '?' + [
+            'a=' + $scope.aggregation,
+            'n=' + $scope.normalise,
+            'm=' + $scope.movingAverage,
+        ].join('&');
+        console.log(api_url);
 
-    var api_url = ($attrs.split) ? '/api/' + $attrs.metric + '/' + $attrs.split : '/api/' + $metric;
-    $http.get(api_url)
-        .success(function(response) {
-            $scope.labels = response.labels;
-            $scope.series = response.series;
-            $scope.data   = response.data;
-        }
-    );
+        $http.get(api_url)
+            .success(function(response) {
+                $scope.labels = response.labels;
+                $scope.series = response.series;
+                $scope.data   = response.data;
+            }
+        );
+    };
+
+    $scope.$watchGroup(['aggregation', 'normalise'], $scope.reloadGraph);
 });
 

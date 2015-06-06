@@ -52,10 +52,10 @@ sub standings {
     my $standings = [];
     
     # Filter by split if provided and valid
-    my ($split_filter, @params) = ('');
+    my ($filter_split_sql, @params) = ('');
     $split_id = 0 unless (defined $split_id and (grep {$_->{id} == $split_id} @$splits));
     if ($split_id != 0) {
-        $split_filter = 'AND split = ?';
+        $filter_split_sql = 'AND split = ?';
         push @params, $split_id;
     }
 
@@ -73,7 +73,7 @@ sub standings {
         WHERE s.id in (summoner1, summoner2)
             AND r1.summoner = m.summoner1
             AND r2.summoner = m.summoner2
-            $split_filter
+            $filter_split_sql
         GROUP BY s.id
     }, { Slice => {} }, @params);
 
@@ -90,21 +90,22 @@ sub standings {
 }
 
 sub data_series {
-    my ($metric, $split_id) = @_;
+    my ($metric, $split_id, %params) = @_;
     my $splits = splits;
 
     # Data configuration
-    my $aggregation = 'cumulative';
-    my $normalise = 0;
+    $params{aggregation}    ||= 'cumulative';
+    $params{normalise}      ||= 0;
+    $params{moving_average} ||= 4;
 
     # Ensure metric is valid
     $METRICS{$metric} or $metric = $DEFAULT_METRIC;
     
     # Filter by split if provided and valid
-    my ($split_filter, @params) = ('1');
+    my ($filter_split_sql, @params) = ('1');
     $split_id = 0 unless (defined $split_id and (grep {$_->{id} == $split_id} @$splits));
     if ($split_id != 0) {
-        $split_filter = 'split = ?';
+        $filter_split_sql = 'split = ?';
         push @params, $split_id;
     }
 
@@ -113,13 +114,13 @@ sub data_series {
         FROM summoner s
             JOIN matchup m ON s.id IN (summoner1, summoner2)
             JOIN result r USING (split, week)
-        WHERE $split_filter
+        WHERE $filter_split_sql
         ORDER BY s.id
     }, { Slice => {} }, @params);
     my $weeks = $dbh->selectcol_arrayref(qq{
         SELECT DISTINCT CONCAT("S", split, " W", week)
         FROM result
-        WHERE $split_filter
+        WHERE $filter_split_sql
         GROUP BY split, week
         ORDER BY split, week
     }, {}, @params);
@@ -136,7 +137,7 @@ sub data_series {
             JOIN matches n USING (split, week)
             JOIN result r1 USING (split, week)
             JOIN result r2 USING (split, week)
-        WHERE $split_filter
+        WHERE $filter_split_sql
             AND r1.summoner = m.summoner1
             AND r2.summoner = m.summoner2
         ORDER BY id, split, week
@@ -161,7 +162,7 @@ sub data_series {
                 $summoner->{pd} = $summoner->{pf} - $summoner->{pa};
 
                 # Normalise values before taking the mean
-                $summoner->{$metric} /= $summoner->{games} if ($normalise);
+                $summoner->{$metric} /= $summoner->{games} if ($params{normalise});
             }
 
             # Calculate mean and store it for the cumulative mean
@@ -172,13 +173,13 @@ sub data_series {
                 my $result   = $results{$summoner->{id}};
 
                 # Calculate value for this week based on given parameters
-                if ($aggregation eq 'mean') {
+                if ($params{aggregation} eq 'mean') {
                     $result->[$week_index] = $summoner->{$metric} - $mean;
 
-                } elsif ($aggregation eq 'mean_cumulative') {
+                } elsif ($params{aggregation} eq 'mean_cumulative') {
                     $result->[$week_index] = $summoner->{$metric} - (sum(@week_means) / @week_means);
 
-                } elsif ($aggregation eq 'cumulative') {
+                } elsif ($params{aggregation} eq 'cumulative') {
                     $result->[$week_index] = $summoner->{$metric};
                     $result->[$week_index] += $result->[$week_index - 1] if ($week_index > 0);
 
@@ -201,21 +202,33 @@ sub data_series {
 }
 
 # Prepare routes
-get '/standings/'           => sub { my $c = shift; $c->stash(page => 'standings', split => 0); $c->render(template => 'standings') };
 get '/standings/:split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 
 get '/graph/:metric/:split' => sub {
     my $c = shift;
     my $metric = metric($c->param('metric'));
-    $c->stash(page => "graph/$metric", title => metric_name($metric));
+    $c->stash(
+        page    => "graph/$metric",
+        title   => metric_name($metric),
+        aggregation => 'cumulative',
+        normalise => undef,
+        moving_average => 5,
+        total_weeks => 14, #TODO
+    );
     $c->render(template => 'graph');
 };
 
-get '/api/standings'        => sub { my $c = shift; $c->render(json => standings()) };
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
-
-get '/api/:metric/'              => sub { my $c = shift; $c->render(json => data_series($c->param('metric'))) };
-get '/api/:metric/:split'        => sub { my $c = shift; $c->render(json => data_series($c->param('metric'), $c->param('split'))) };
+get '/api/:metric/:split'   => sub {
+    my $c = shift;
+    $c->render(json => data_series(
+        $c->param('metric'),
+        $c->param('split'),
+        aggregation    => $c->param('a'),
+        normalise      => $c->param('n'),
+        moving_average => $c->param('m'),
+    ));
+};
 
 get '/'                     => sub { my $c = shift; $c->redirect_to('standings/0') };
 
