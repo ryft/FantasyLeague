@@ -46,13 +46,13 @@ sub default_params {
         return (
             aggregation    => 'raw',
             normalise      => 'true',
-            moving_average => 4,
+            moving_average => 1,
         );
     } else {
         return (
             aggregation    => 'cumulative',
             normalise      => 'false',
-            moving_average => 4,
+            moving_average => 1,
         );
     }
 }
@@ -136,6 +136,7 @@ sub data_series {
         WHERE $filter_split_sql
         ORDER BY s.id
     }, { Slice => {} }, @params);
+
     my $weeks = $dbh->selectcol_arrayref(qq{
         SELECT DISTINCT CONCAT("S", split, " W", week)
         FROM result
@@ -186,18 +187,16 @@ sub data_series {
             }
 
             # Calculate mean and store it for the cumulative mean
-            my $mean = sum( map { $_->{$metric} } values(%$week) ) / values(%$week);
-            push @week_means, $mean;
+            push @week_means, sum( map { $_->{$metric} } values(%$week) ) / values(%$week);
+            shift @week_means if (@week_means > $params{moving_average});
+            my $accumulated_mean = sum(@week_means) / @week_means;
 
             for my $summoner (values %$week) {
                 my $result   = $results{$summoner->{id}};
 
                 # Calculate value for this week based on given parameters
-                if ($params{aggregation} eq 'mean') {
-                    $result->[$week_index] = $summoner->{$metric} - $mean;
-
-                } elsif ($params{aggregation} eq 'mean_cumulative') {
-                    $result->[$week_index] = $summoner->{$metric} - (sum(@week_means) / @week_means);
+                if ($params{aggregation} eq 'deviation') {
+                    $result->[$week_index] = $summoner->{$metric} - $accumulated_mean;
 
                 } elsif ($params{aggregation} eq 'cumulative') {
                     $result->[$week_index] = $summoner->{$metric};
@@ -221,21 +220,21 @@ sub data_series {
     };
 }
 
-# Prepare routes
-get '/standings/:split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
-
+# Prepare UI routes
+get '/' => sub { my $c = shift; $c->redirect_to('standings/0') };
+get '/standings/:split' => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 get '/graph/:metric/:split' => sub {
     my $c = shift;
     my $metric = metric($c->param('metric'));
     $c->stash(
         page    => "graph/$metric",
         title   => metric_name($metric),
-        total_weeks => 14,
         default_params($metric),
     );
     $c->render(template => 'graph');
 };
 
+# Prepare API routes
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
 get '/api/:metric/:split'   => sub {
     my $c = shift;
@@ -247,8 +246,6 @@ get '/api/:metric/:split'   => sub {
         moving_average => $c->param('m'),
     ));
 };
-
-get '/'                     => sub { my $c = shift; $c->redirect_to('standings/0') };
 
 app->secrets($config->{secrets});
 app->start;

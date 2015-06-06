@@ -5,14 +5,13 @@
                 aggregation="<%= $aggregation %>"
                 normalise="<%= $normalise %>"
                 moving-average="<%= $moving_average %>"
-                total-weeks="<%= $total_weeks %>"
                 >
 
                 <div class="well well--params">
                     <span class="caret indicator"></span>
                     <p class="caption"><a data-toggle="collapse" href="#params">Graph Parameters</a></p>
                     <div class="collapse" id="params">
-                        <div class="checkbox" ng-show="can_normalise">
+                        <div class="checkbox" ng-show="canNormalise">
                             <label>
                                 <input type="checkbox" ng-model="normalise"> Normalise values
                             </label>
@@ -25,7 +24,7 @@
                         <div ng-show="aggregation == 'deviation'">
                             <p>Moving average length</p>
                             <span class="slider-container">
-                                <slider id="slider" ng-model="movingAverage" max="totalWeeks" tooltip="hide"></slider>
+                                <slider id="slider" ng-model="movingAverage" min="'1'" max="labels.length" tooltip="hide" onStopSlide="reloadGraph"></slider>
                                 <label class="pull-right" ng-bind="movingAverage"></label>
                             </span>
                         </div>
