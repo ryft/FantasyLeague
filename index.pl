@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
+use Data::Dump qw/dump/;
 use DBI;
+use List::Util qw/sum/;
 use YAML::XS qw/LoadFile/;
 
 use Mojolicious::Lite;
@@ -71,8 +73,8 @@ sub data_series {
 
     # Data configuration
     my $metric = 'pf';
-    my $aggregation = 'cumulative';
-    my $normalise = 0;
+    my $aggregation = 'mean_cumulative';
+    my $normalise = 1;
     
     # Filter by split if provided and valid
     my ($split_filter, @params) = ('1');
@@ -82,14 +84,14 @@ sub data_series {
         push @params, $split_id;
     }
 
-    my $summoners = $dbh->selectcol_arrayref(qq{
-        SELECT DISTINCT name
+    my $summoners = $dbh->selectall_arrayref(qq{
+        SELECT DISTINCT s.id, name
         FROM summoner s
-        JOIN matchup m ON s.id IN (summoner1, summoner2)
-        JOIN result r USING (split, week)
+            JOIN matchup m ON s.id IN (summoner1, summoner2)
+            JOIN result r USING (split, week)
         WHERE $split_filter
         ORDER BY s.id
-    }, {}, @params);
+    }, { Slice => {} }, @params);
     my $weeks = $dbh->selectcol_arrayref(qq{
         SELECT DISTINCT CONCAT("S", split, " W", week)
         FROM result
@@ -99,7 +101,7 @@ sub data_series {
     }, {}, @params);
 
     my $data = $dbh->selectall_hashref(qq{
-        SELECT s.id, s.name, split, week,
+        SELECT s.id, s.name, split, week, games,
             IF ((r1.score > r2.score AND summoner1 = s.id) OR (r2.score > r1.score AND summoner2 = s.id), 1, 0) won,
             IF  (r1.score = r2.score, 1, 0) tied,
             IF ((r1.score > r2.score AND summoner2 = s.id) OR (r2.score > r1.score AND summoner1 = s.id), 1, 0) lost,
@@ -107,68 +109,74 @@ sub data_series {
             IF (summoner1 = s.id, r2.score, r1.score) pa
         FROM summoner s
             JOIN matchup m ON s.id IN (summoner1, summoner2)
+            JOIN matches n USING (split, week)
             JOIN result r1 USING (split, week)
             JOIN result r2 USING (split, week)
         WHERE $split_filter
             AND r1.summoner = m.summoner1
             AND r2.summoner = m.summoner2
         ORDER BY id, split, week
-    }, [qw/id split week/], {}, @params);
+    }, [qw/split week id/], {}, @params);
     
-    my @results = ();
+    # Initialise results hash
+    my %results     = ();
+    $results{$_}    = [(0) x @$weeks] for (map {$_->{id}} @$summoners);
+    my @week_means  = ();
+    my $week_index  = 0;
 
-    # Collect stats for summoners in each week
-    for (sort keys %$data) {
-        my $summoner = $data->{$_};
-        my @result = ();
-        my $total  = 0;
+    for (sort {$a <=> $b} keys %$data) {
+        my $split   = $data->{$_};
 
-        for (sort keys %$summoner) {
-            my $split = $summoner->{$_};
-            for (sort keys %$split) {
-                my $week = $split->{$_};
+        for (sort {$a <=> $b} keys %$split) {
+            my $week = $split->{$_};
 
-                $total = $aggregation eq 'cumulative'
-                    ? $total + $week->{$metric} : $week->{$metric};
-                push @result, $total;
+            # Perform some pre-processing for this week's results
+            for my $summoner (values %$week) {
+
+                # Generate points difference metrics
+                $summoner->{pd} = $summoner->{pf} - $summoner->{pa};
+
+                # Normalise values before taking the mean
+                $summoner->{$metric} /= $summoner->{games} if ($normalise);
             }
+
+            # Calculate mean and store it for the cumulative mean
+            my $mean = sum( map { $_->{$metric} } values(%$week) ) / values(%$week);
+            push @week_means, $mean;
+
+            for my $summoner (values %$week) {
+                my $result   = $results{$summoner->{id}};
+
+                # Calculate value for this week based on given parameters
+                if ($aggregation eq 'mean') {
+                    $result->[$week_index] = $summoner->{$metric} - $mean;
+
+                } elsif ($aggregation eq 'mean_cumulative') {
+                    $result->[$week_index] = $summoner->{$metric} - (sum(@week_means) / @week_means);
+
+                } elsif ($aggregation eq 'cumulative') {
+                    $result->[$week_index] = $summoner->{$metric};
+                    $result->[$week_index] += $result->[$week_index - 1] if ($week_index > 0);
+
+                } else {
+                    $result->[$week_index] = $summoner->{$metric};
+                }
+            }
+            $week_index++;
         }
-        
-        # Pad the result to the correct number of weeks
-        #   This is necessary because some summoners joined late
-        #   If summoners start leaving, it will be worthwhile to
-        #   maintain a (split, week) -> week # mapping.
-        unshift @result, (0) x (scalar @$weeks - scalar @result);
-        push @results, \@result;
     }
 
-#    return {
-#        labels => ["January", "February", "March", "April", "May", "June", "July"],
-#        series => ['Series A', 'Series B'],
-#        data => [
-#          [65, 59, 80, 81, 56, 55, 40],
-#          [28, 48, 40, 19, 86, 27, 90]
-#        ],
-#    };
+    # Format the results into a 2D array for graphing
+    my @output = map {$results{$_}} (sort keys %results);
 
     return {
         labels => $weeks,
-        series => $summoners,
-        data   => \@results,
-        #data   => [
-        #    [3,4,6,3,2,3,4,5,3,6,4,3,2,1,3,4,5,3,2,6,3],
-        #    [3,4,6,3,2,4,2,2,3,1,4,4,5,3,3,4,6,2,5,2,4],
-        #    [3,4,6,3,2,3,4,5,3,6,4,3,2,1,3,4,5,3,2,6,3],
-        #    [3,4,6,3,2,4,2,2,3,1,4,4,5,3,3,4,6,2,5,2,4],
-        #    [3,4,6,3,2,3,4,5,3,6,4,3,2,1,3,4,5,3,2,6,3],
-        #    [3,4,6,3,2,4,2,2,3,1,4,4,5,3,3,4,6,2,5,2,4],
-        #    [3,4,6,3,2,3,4,5,3,6,4,3,2,1,3,4,5,3,2,6,3],
-        #    [3,4,6,3,2,4,2,2,3,1,4,4,5,3,3,4,6,2,5,2,4],
-        #],
+        series => [ map {$_->{name}} @$summoners ],
+        data   => \@output,
     };
 }
 
-# Set up routes
+# Prepare routes
 get '/standings/'           => sub { my $c = shift; $c->stash(page => 'standings', split => 0); $c->render(template => 'standings') };
 get '/standings/*split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 
