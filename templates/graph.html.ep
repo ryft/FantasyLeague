@@ -2,22 +2,25 @@
             <div ng-controller="ChartCtrl" metric="<%= $metric %>" split="<%= $split %>">
 
                 <div class="well well--params">
-                    <p class="caption">Graph Parameters</p>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox"> Normalise values
-                        </label>
+                    <span class="caret indicator"></span>
+                    <p class="caption"><a data-toggle="collapse" href="#params">Graph Parameters</a></p>
+                    <div class="collapse" id="params">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox"> Normalise values
+                            </label>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-default">Raw values</button>
+                            <button type="button" class="btn btn-default">Cumulative</button>
+                            <button type="button" class="btn btn-default">Mean deviation</button>
+                        </div>
+                        <p>Moving average length</p>
+                        <span id="slider">
+                            <slider ng-model="movingAverageLength" min="'1'" max="'21'" tooltip="hide"></slider>
+                            <label class="pull-right" ng-bind="movingAverageLength"></label>
+                        </slider>
                     </div>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-default">Raw values</button>
-                        <button type="button" class="btn btn-default">Cumulative</button>
-                        <button type="button" class="btn btn-default">Mean deviation</button>
-                    </div>
-                    <p>Moving average length</p>
-                    <span id="slider">
-                        <slider ng-model="movingAverageLength" min="'1'" max="'21'" tooltip="hide"></slider>
-                        <label class="pull-right" ng-bind="movingAverageLength"></label>
-                    </slider>
                 </div>
 
                 <h2><%= $title %></h2>
