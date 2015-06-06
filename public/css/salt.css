@@ -1,0 +1,36 @@
+.well--params {
+    position: relative;
+    display: inline-block;
+    padding: 36px 16px 12px 16px;
+    float: right;
+}
+
+.well--params * {
+    margin: 2px auto;
+    font-size: 14px;
+}
+
+.well--params .caption {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #959595;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#slider * {
+    display: inline-block;
+}
+
+.slider-selection {
+    background: #95a5a6;
+}
+
+.slider-handle {
+    display: block;
+    background: #18bc9c;
+}
+
