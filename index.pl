@@ -6,11 +6,22 @@ use warnings;
 use Data::Dump qw/dump/;
 use DBI;
 use List::Util qw/sum/;
+use Readonly;
 use YAML::XS qw/LoadFile/;
 
 use Mojolicious::Lite;
 
-my $config = LoadFile('config.yaml');
+Readonly my $CONFIG => 'config.yaml';
+Readonly my %METRICS => {
+    won     => 'Matches Won',
+    tied    => 'Matches Tied',
+    lost    => 'Matches Lost',
+    pf      => 'Points For',
+    pa      => 'Points Against',
+    pd      => 'Points Difference',
+};
+
+my $config = LoadFile($CONFIG);
 my $db_cfg = $config->{mysql};
 my $dbh = DBI->connect("dbi:mysql:$db_cfg->{database}",
     $db_cfg->{username},
@@ -68,13 +79,17 @@ sub standings {
 }
 
 sub data_series {
-    my ($function, $split_id) = @_;
+    my ($metric, $split_id) = @_;
     my $splits = splits;
 
     # Data configuration
-    my $metric = 'pf';
-    my $aggregation = 'mean_cumulative';
-    my $normalise = 1;
+    my $aggregation = 'cumulative';
+    my $normalise = 0;
+
+    # Ensure metric is valid
+    warn $metric;
+    $METRICS{$metric} or $metric = 'won';
+    warn $metric;
     
     # Filter by split if provided and valid
     my ($split_filter, @params) = ('1');
@@ -180,20 +195,14 @@ sub data_series {
 get '/standings/'           => sub { my $c = shift; $c->stash(page => 'standings', split => 0); $c->render(template => 'standings') };
 get '/standings/*split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 
-get '/charts/pf/'           => sub { my $c = shift; $c->stash(page => 'charts/pf', split => 0); $c->render(template => 'chart-pf') };
-get '/charts/pf/:split'     => sub { my $c = shift; $c->stash(page => 'charts/pf'); $c->render(template => 'chart-pf') };
-
-get '/charts/pa/'           => sub { my $c = shift; $c->stash(page => 'charts/pa', split => 0); $c->render(template => 'standings') };
-get '/charts/pa/:split'     => sub { my $c = shift; $c->stash(page => 'charts/pa'); $c->render(template => 'standings') };
-
-get '/charts/pd/'           => sub { my $c = shift; $c->stash(page => 'charts/pd', split => 0); $c->render(template => 'standings') };
-get '/charts/pd/:split'     => sub { my $c = shift; $c->stash(page => 'charts/pd'); $c->render(template => 'standings') };
+get '/graph/:metric/'           => sub { my $c = shift; $c->stash(page => 'graphs', split => 0); $c->render(template => 'graph') };
+get '/graph/:metric/:split'     => sub { my $c = shift; $c->stash(page => 'graphs'); $c->render(template => 'graph') };
 
 get '/api/standings'        => sub { my $c = shift; $c->render(json => standings()) };
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
 
-get '/api/pf'               => sub { my $c = shift; $c->render(json => data_series('pf')) };
-get '/api/pf/:split'        => sub { my $c = shift; $c->render(json => data_series('pf', $c->param('split'))) };
+get '/api/:metric/'              => sub { my $c = shift; $c->render(json => data_series($c->param('metric'))) };
+get '/api/:metric/:split'        => sub { my $c = shift; $c->render(json => data_series($c->param('metric'), $c->param('split'))) };
 
 get '/'                     => sub { my $c = shift; $c->redirect_to('standings') };
 

@@ -1,5 +1,5 @@
 %layout 'wrapper', title => 'Standings';
-            <table ng-controller="StandingsCtrl" split="<%= $split %>" ng-init="split = <%= $split %>" class="table">
+            <table ng-controller="StandingsCtrl" split="<%= $split %>" class="table">
                 <thead>
                     <tr>
                         <th><a href="" ng-click="predicate='name';    reverse=!reverse">Summoner</a></th>

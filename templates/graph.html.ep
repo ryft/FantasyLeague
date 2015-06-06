@@ -1,0 +1,8 @@
+%layout 'wrapper', title => $metric;
+            <div ng-controller="ChartCtrl" metric="<%= $metric %>" split="<%= $split %>">
+                <canvas id="line" class="chart chart-line" data="data"
+                    labels="labels" legend="true" series="series"
+                    click="onClick">
+                </canvas>
+            </div>
+

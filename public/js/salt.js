@@ -12,20 +12,13 @@ app.controller('StandingsCtrl', function($scope, $attrs, $http) {
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
-    var api_url = ($attrs.split) ? '/api/pf/' + $attrs.split : '/api/pf';
+    var api_url = ($attrs.split) ? '/api/' + $attrs.metric + '/' + $attrs.split : '/api/' + $metric;
     $http.get(api_url)
         .success(function(response) {
-console.log(response);
             $scope.labels = response.labels;
             $scope.series = response.series;
             $scope.data   = response.data;
         }
     );
-//    $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
-//    $scope.series = ['Series A', 'Series B'];
-//    $scope.data = [
-//      [65, 59, 80, 81, 56, 55, 40],
-//      [28, 48, 40, 19, 86, 27, 90]
-//    ];
 });
 
