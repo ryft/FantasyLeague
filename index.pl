@@ -30,9 +30,14 @@ my $dbh = DBI->connect("dbi:mysql:$db_cfg->{database}",
     { mysql_auto_reconnect => 1 }
 ) or die $DBI::errstr;
 
+sub metric {
+    my $metric = shift;
+    return $METRICS{$metric} ? $metric : $DEFAULT_METRIC;
+}
+
 sub metric_name {
     my $metric = shift;
-    return $METRICS{$metric} || $METRICS{$DEFAULT_METRIC};
+    return $METRICS{metric($metric)};
 }
 
 sub splits {
@@ -197,10 +202,14 @@ sub data_series {
 
 # Prepare routes
 get '/standings/'           => sub { my $c = shift; $c->stash(page => 'standings', split => 0); $c->render(template => 'standings') };
-get '/standings/*split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
+get '/standings/:split'     => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 
-get '/graph/:metric/'           => sub { my $c = shift; $c->stash(page => 'graphs', title => metric_name($c->param('metric')), split => 0); $c->render(template => 'graph') };
-get '/graph/:metric/:split'     => sub { my $c = shift; $c->stash(page => 'graphs', title => metric_name($c->param('metric'))); $c->render(template => 'graph') };
+get '/graph/:metric/:split' => sub {
+    my $c = shift;
+    my $metric = metric($c->param('metric'));
+    $c->stash(page => "graph/$metric", title => metric_name($metric));
+    $c->render(template => 'graph');
+};
 
 get '/api/standings'        => sub { my $c = shift; $c->render(json => standings()) };
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
@@ -208,7 +217,7 @@ get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings
 get '/api/:metric/'              => sub { my $c = shift; $c->render(json => data_series($c->param('metric'))) };
 get '/api/:metric/:split'        => sub { my $c = shift; $c->render(json => data_series($c->param('metric'), $c->param('split'))) };
 
-get '/'                     => sub { my $c = shift; $c->redirect_to('standings') };
+get '/'                     => sub { my $c = shift; $c->redirect_to('standings/0') };
 
 app->secrets($config->{secrets});
 app->start;

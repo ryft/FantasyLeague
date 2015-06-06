@@ -1,4 +1,4 @@
-var app = angular.module('SaltApp', ['chart.js']);
+var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider']);
 
 app.controller('StandingsCtrl', function($scope, $attrs, $http) {
     var api_url = ($attrs.split) ? '/api/standings/' + $attrs.split : '/api/standings';
@@ -12,6 +12,9 @@ app.controller('StandingsCtrl', function($scope, $attrs, $http) {
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
+    $scope.movingAverageLength = 12;
+
+
     var api_url = ($attrs.split) ? '/api/' + $attrs.metric + '/' + $attrs.split : '/api/' + $metric;
     $http.get(api_url)
         .success(function(response) {

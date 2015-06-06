@@ -7,6 +7,8 @@
 
         <link rel="stylesheet" href="/bootswatch/flatly/bootstrap.min.css">
         <link rel="stylesheet" href="/angular-chart.js/dist/angular-chart.css">
+        <link rel="stylesheet" href="/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css">
+        <link rel="stylesheet" href="/css/salt.css">
         
         <script src="/angular/angular.min.js"></script>
         <script src="/jquery/dist/jquery.min.js"></script>
@@ -14,6 +16,8 @@
         <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
         <script src="/Chart.js/Chart.min.js"></script>
         <script src="/angular-chart.js/dist/angular-chart.min.js"></script>
+        <script src="/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+        <script src="/angular-bootstrap-slider/slider.js"></script>
         <script src="/js/salt.js"></script>
     </head>
     <body>
@@ -30,7 +34,7 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li class="<%= ($page eq 'standings') ? 'active' : '' %>"><a href="/">Standings</a></li>
+                        <li class="<%= ($page eq 'standings') ? 'active' : '' %>"><a href="/standings/<%= $split %>">Standings</a></li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Summoners <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
@@ -38,15 +42,17 @@
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Charts <span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Graphs <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="/charts/pf">Points For</a></li>
-                                <li><a href="/charts/pa">Points Against</a></li>
-                                <li><a href="/charts/pd">Points Difference</a></li>
-                                <!--<li class="divider"></li>
-                                <li class="dropdown-header">Nav header</li>
-                                <li><a href="#">Separated link</a></li>
-                                <li><a href="#">One more separated link</a></li>-->
+                                <li class="dropdown-header">Matches</li>
+                                <li class="<%= $page eq 'graph/won' ? 'active' : '' %>"><a href="/graph/won/<%= $split %>">Wins</a></li>
+                                <li class="<%= $page eq 'graph/tied' ? 'active' : '' %>"><a href="/graph/tied/<%= $split %>">Ties</a></li>
+                                <li class="<%= $page eq 'graph/lost' ? 'active' : '' %>"><a href="/graph/lost/<%= $split %>">Losses</a></li>
+                                <li class="divider"></li>
+                                <li class="dropdown-header">Points Totals</li>
+                                <li class="<%= $page eq 'graph/pf' ? 'active' : '' %>"><a href="/graph/pf/<%= $split %>">Points For</a></li>
+                                <li class="<%= $page eq 'graph/pa' ? 'active' : '' %>"><a href="/graph/pa/<%= $split %>">Points Against</a></li>
+                                <li class="<%= $page eq 'graph/pd' ? 'active' : '' %>"><a href="/graph/pd/<%= $split %>">Points Difference</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -63,7 +69,6 @@
         </nav>
 
         <div class="container">
-            <h2><%= $title %></h2>
 <%= content %>
         </div>
 
