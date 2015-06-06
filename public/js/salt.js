@@ -13,9 +13,10 @@ app.controller('StandingsCtrl', function($scope, $attrs, $http) {
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
     $scope.aggregation   = $attrs.aggregation;
-    $scope.normalise     = $attrs.normalise ? true : false;
+    $scope.normalise     = $attrs.normalise == 'true';
     $scope.movingAverage = parseInt($attrs.movingAverage);
     $scope.totalWeeks    = parseInt($attrs.totalWeeks);
+    $scope.can_normalise = $.inArray($attrs.metric, ['pf', 'pa', 'pd']) >= 0;
 
     $scope.reloadGraph = function() {
         var api_url = '/api/' + $attrs.metric + '/' + $attrs.split + '?' + [

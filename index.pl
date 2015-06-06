@@ -40,6 +40,25 @@ sub metric_name {
     return $METRICS{metric($metric)};
 }
 
+sub default_params {
+    my $metric = shift;
+    if ($metric =~ /pf|pa|pd/) {
+        return (
+            aggregation    => 'raw',
+            normalise      => 'true',
+            moving_average => 4,
+        );
+    } else {
+        return (
+            aggregation    => 'cumulative',
+            normalise      => 'false',
+            moving_average => 4,
+        );
+    }
+}
+
+sub can_normalise { shift =~ /pf|pa|pd/ }
+
 sub splits {
     return $dbh->selectall_arrayref(q{
         SELECT * FROM split
@@ -95,8 +114,8 @@ sub data_series {
 
     # Data configuration
     $params{aggregation}    ||= 'cumulative';
-    $params{normalise}      ||= 0;
     $params{moving_average} ||= 4;
+    $params{normalise}      ||= 'false';
 
     # Ensure metric is valid
     $METRICS{$metric} or $metric = $DEFAULT_METRIC;
@@ -162,7 +181,8 @@ sub data_series {
                 $summoner->{pd} = $summoner->{pf} - $summoner->{pa};
 
                 # Normalise values before taking the mean
-                $summoner->{$metric} /= $summoner->{games} if ($params{normalise});
+                $summoner->{$metric} /= $summoner->{games}
+                    if ($params{normalise} eq 'true' and can_normalise($metric));
             }
 
             # Calculate mean and store it for the cumulative mean
@@ -210,10 +230,8 @@ get '/graph/:metric/:split' => sub {
     $c->stash(
         page    => "graph/$metric",
         title   => metric_name($metric),
-        aggregation => 'cumulative',
-        normalise => undef,
-        moving_average => 5,
-        total_weeks => 14, #TODO
+        total_weeks => 14,
+        default_params($metric),
     );
     $c->render(template => 'graph');
 };
