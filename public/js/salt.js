@@ -1,12 +1,19 @@
 var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider']);
 
 app.controller('StandingsCtrl', function($scope, $attrs, $http) {
-    var api_url = ($attrs.split) ? '/api/standings/' + $attrs.split : '/api/standings';
-    $http.get(api_url)
+    $http.get('/api/standings/' + $attrs.split)
         .success(function(response) {
             $scope.standings = response;
             $scope.predicate = '[splits, won, tied, pf, pa]';
             $scope.reverse   = true;
+        }
+    );
+});
+
+app.controller('ResultsCtrl', function($scope, $attrs, $http) {
+    $http.get('/api/results/' + $attrs.split)
+        .success(function(response) {
+            $scope.results   = response;
         }
     );
 });

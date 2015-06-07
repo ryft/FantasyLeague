@@ -6,14 +6,14 @@
                     <tr>
                         <th><a href="" ng-click="predicate='name';    reverse=!reverse">Summoner</a></th>
                     % if ($split == 0) {
-                        <th><a href="" ng-click="predicate='splits';  reverse=!reverse">Splits</th>
+                        <th><a href="" ng-click="predicate='splits';  reverse=!reverse">Splits</a></th>
                     % }
-                        <th><a href="" ng-click="predicate='won';     reverse=!reverse">Wins</th>
-                        <th><a href="" ng-click="predicate='tied';    reverse=!reverse">Ties</th>
-                        <th><a href="" ng-click="predicate='lost';    reverse=!reverse">Losses</th>
-                        <th><a href="" ng-click="predicate='pf';      reverse=!reverse">Points For</th>
-                        <th><a href="" ng-click="predicate='pa';      reverse=!reverse">Points Against</th>
-                        <th><a href="" ng-click="predicate='pd';      reverse=!reverse">Points Difference</th>
+                        <th><a href="" ng-click="predicate='won';     reverse=!reverse">Wins</a></th>
+                        <th><a href="" ng-click="predicate='tied';    reverse=!reverse">Ties</a></th>
+                        <th><a href="" ng-click="predicate='lost';    reverse=!reverse">Losses</a></th>
+                        <th><a href="" ng-click="predicate='pf';      reverse=!reverse">Points For</a></th>
+                        <th><a href="" ng-click="predicate='pa';      reverse=!reverse">Points Against</a></th>
+                        <th><a href="" ng-click="predicate='pd';      reverse=!reverse">Points Difference</a></th>
                     </tr>
                 <thead>
                 <tbody>

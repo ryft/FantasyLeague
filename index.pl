@@ -113,6 +113,32 @@ sub standings {
     return $standings;
 }
 
+sub get_results {
+    my ($split_clause, @params) = filter_split_clause shift;
+    return $dbh->selectall_arrayref(qq{
+        SELECT split, week, s1.name summoner1, s2.name summoner2, r1.score points1, r2.score points2
+        FROM matchup m
+            JOIN summoner s1 ON s1.id = summoner1
+            JOIN summoner s2 ON s2.id = summoner2
+            JOIN result r1 USING (split, week)
+            JOIN result r2 using (split, week)
+        WHERE $split_clause
+            AND r1.summoner = summoner1
+            AND r2.summoner = summoner2
+    }, { Slice => {} }, @params);
+}
+
+sub results {
+    my $results = get_results shift;
+    warn dump($results);
+
+    for my $result (@$results) {
+        # Convert strings to numbers for table sorting
+        $result->{$_} += 0.0 for qw/split week points1 points2/;
+    }
+    return $results;
+}
+
 sub get_summoners {
     my ($split_clause, @params) = filter_split_clause shift;
     return $dbh->selectall_arrayref(qq{
@@ -230,6 +256,7 @@ sub data_series {
 # Prepare UI routes
 get '/' => sub { my $c = shift; $c->redirect_to('standings/0') };
 get '/standings/:split' => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
+get '/results/:split'   => sub { my $c = shift; $c->stash(page => 'results');   $c->render(template => 'results') };
 get '/graph/:metric/:split' => sub {
     my $c = shift;
     my $metric = metric($c->param('metric'));
@@ -243,6 +270,7 @@ get '/graph/:metric/:split' => sub {
 
 # Prepare API routes
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
+get '/api/results/:split'   => sub { my $c = shift; $c->render(json => results($c->param('split'))) };
 get '/api/:metric/:split'   => sub {
     my $c = shift;
     $c->render(json => data_series(

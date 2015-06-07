@@ -1,0 +1,30 @@
+%layout 'wrapper';
+            <h2>Results</h2>
+
+            <table ng-controller="ResultsCtrl" split="<%= $split %>" class="table">
+                <thead>
+                    <tr>
+                    % if ($split == 0) {
+                        <th>Split</th>
+                    % }
+                        <th>Week</th>
+                        <th>Summoner 1</th>
+                        <th>Points</th>
+                        <th>Summoner 2</th>
+                        <th>Points</th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr ng-repeat="r in results">
+                    % if ($split == 0) {
+                        <td>{{ r.split   | number   }}</td>
+                    % }
+                        <td>{{ r.week    | number   }}</td>
+                        <td>{{ r.summoner1          }}</td>
+                        <td>{{ r.points1 | number:2 }}</td>
+                        <td>{{ r.summoner2          }}</td>
+                        <td>{{ r.points2 | number:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
