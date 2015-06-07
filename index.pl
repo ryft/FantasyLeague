@@ -114,23 +114,38 @@ sub standings {
 }
 
 sub get_results {
-    my ($split_clause, @params) = filter_split_clause shift;
+    my ($split, $entities) = @_;
+    my ($split_clause, @params) = filter_split_clause $split;
+
+    # Filter by matches between given summoners if provided
+    my $placeholders = $entities =~ s/\d+/?/gr;
+    my @entity_array = split ',', $entities;
+    $split_clause .= qq{
+            AND summoner1 IN ($placeholders)
+            AND summoner2 IN ($placeholders)
+    } if (@_);
+    push @params, (@entity_array, @entity_array);
+
     return $dbh->selectall_arrayref(qq{
-        SELECT split, week, s1.name summoner1, s2.name summoner2, r1.score points1, r2.score points2
+        SELECT split, week, s1.name summoner1, s2.name summoner2, t1.name team1, t2.name team2, r1.score points1, r2.score points2
         FROM matchup m
             JOIN summoner s1 ON s1.id = summoner1
             JOIN summoner s2 ON s2.id = summoner2
+            JOIN team t1 USING (split)
+            JOIN team t2 USING (split)
             JOIN result r1 USING (split, week)
-            JOIN result r2 using (split, week)
+            JOIN result r2 USING (split, week)
         WHERE $split_clause
+            AND t1.summoner = summoner1
+            AND t2.summoner = summoner2
             AND r1.summoner = summoner1
             AND r2.summoner = summoner2
     }, { Slice => {} }, @params);
 }
 
 sub results {
-    my $results = get_results shift;
-    warn dump($results);
+    my ($split, %params) = @_;
+    my $results = get_results $split, $params{entities};
 
     for my $result (@$results) {
         # Convert strings to numbers for table sorting
@@ -147,8 +162,32 @@ sub get_summoners {
             JOIN matchup m ON s.id IN (summoner1, summoner2)
             JOIN result r USING (split, week)
         WHERE $split_clause
-        ORDER BY s.id
+        ORDER BY s.id ASC
     }, { Slice => {} }, @params);
+}
+
+sub get_teams {
+    my ($split_clause, @params) = filter_split_clause shift;
+    return $dbh->selectall_arrayref(qq{
+        SELECT DISTINCT id, t.name
+        FROM team t
+            JOIN summoner s ON id = summoner
+        WHERE $split_clause
+        ORDER BY id ASC
+    }, { Slice => {} }, @params);
+}
+
+sub entities {
+    my ($split, %params) = @_;
+
+    my @filter = ();
+    push (@filter, split ',', $params{entities}) if ($params{entities});
+
+    if ($split > 0) {
+        return get_teams($split, @filter);
+    } else {
+        return get_summoners($split, @filter);
+    }
 }
 
 sub get_weeks {
@@ -270,7 +309,14 @@ get '/graph/:metric/:split' => sub {
 
 # Prepare API routes
 get '/api/standings/:split' => sub { my $c = shift; $c->render(json => standings($c->param('split'))) };
-get '/api/results/:split'   => sub { my $c = shift; $c->render(json => results($c->param('split'))) };
+get '/api/entities/:split'  => sub { my $c = shift; $c->render(json => entities($c->param('split'))) };
+get '/api/results/:split'   => sub {
+    my $c = shift;
+    $c->render(json => results(
+        $c->param('split'),
+        entities => $c->param('e'),
+    ));
+};
 get '/api/:metric/:split'   => sub {
     my $c = shift;
     $c->render(json => data_series(

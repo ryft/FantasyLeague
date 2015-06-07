@@ -7,7 +7,7 @@
                 moving-average="<%= $moving_average %>"
                 >
 
-                <div class="well well--params" ng-show="showControls">
+                <div class="well well--params form-group" ng-show="showControls">
                     <span class="caret indicator"></span>
                     <p class="caption"><a data-toggle="collapse" href="#params">Graph Parameters</a></p>
                     <div class="collapse" id="params">

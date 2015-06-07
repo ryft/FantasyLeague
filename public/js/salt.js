@@ -11,11 +11,30 @@ app.controller('StandingsCtrl', function($scope, $attrs, $http) {
 });
 
 app.controller('ResultsCtrl', function($scope, $attrs, $http) {
-    $http.get('/api/results/' + $attrs.split)
+    $scope.entities = [];
+
+    $http.get('/api/entities/' + $attrs.split)
         .success(function(response) {
-            $scope.results   = response;
+            $scope.entities = response;
+            $scope.entities.forEach(function(e) {
+                e.selected = true;
+            });
         }
     );
+
+    $scope.reloadData = function() {
+        var api_url = '/api/results/' + $attrs.split + '?e='
+            + $scope.entities.filter(function(e) { return e.selected })
+                .map(function(e) { return e.id }).join(',');
+        console.log(api_url);
+        $http.get(api_url)
+            .success(function(response) {
+                $scope.results = response;
+            }
+        );
+    };
+
+    $scope.$watch('entities', $scope.reloadData, true);
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
