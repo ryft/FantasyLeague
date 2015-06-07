@@ -59,26 +59,28 @@ sub default_params {
 
 sub can_normalise { shift =~ /pf|pa|pd/ }
 
-sub splits {
+sub get_splits {
     return $dbh->selectall_arrayref(q{
         SELECT * FROM split
     }, { Slice => {} });
 }
 
-sub standings {
-    my $split_id = shift;
-    my $splits = splits;
-    my $standings = [];
-    
-    # Filter by split if provided and valid
-    my ($filter_split_sql, @params) = ('');
-    $split_id = 0 unless (defined $split_id and (grep {$_->{id} == $split_id} @$splits));
-    if ($split_id != 0) {
-        $filter_split_sql = 'AND split = ?';
-        push @params, $split_id;
+# Filter by split if provided and valid
+# Returns (where clause, params)
+sub filter_split_clause {
+    my $split = shift;
+    my $splits = get_splits;
+    my ($sql, @params) = ('1');
+    if ($split and (grep {$_->{id} == $split} @$splits)) {
+        $sql = 'split = ?';
+        push @params, $split;
     }
+    return ($sql, @params);
+}
 
-    $standings = $dbh->selectall_arrayref(qq{
+sub get_standings {
+    my ($split_clause, @params) = filter_split_clause shift;
+    return $dbh->selectall_arrayref(qq{
         SELECT s.id, s.name, COUNT(DISTINCT split) splits,
             SUM(IF ((r1.score > r2.score AND summoner1 = s.id) OR (r2.score > r1.score AND summoner2 = s.id), 1, 0)) won,
             SUM(IF  (r1.score = r2.score, 1, 0)) tied,
@@ -86,15 +88,19 @@ sub standings {
             SUM(IF (summoner1 = s.id, r1.score, r2.score)) pf,
             SUM(IF (summoner1 = s.id, r2.score, r1.score)) pa
         FROM summoner s
-            JOIN matchup m on s.id = summoner1 OR s.id = summoner2
-            JOIN result r1 using (split, week)
-            JOIN result r2 using (split, week)
-        WHERE s.id in (summoner1, summoner2)
+            JOIN matchup m ON s.id IN (summoner1, summoner2)
+            JOIN result r1 USING (split, week)
+            JOIN result r2 USING (split, week)
+        WHERE $split_clause
             AND r1.summoner = m.summoner1
             AND r2.summoner = m.summoner2
-            $filter_split_sql
         GROUP BY s.id
     }, { Slice => {} }, @params);
+}
+
+sub standings {
+    my $splits    = get_splits;
+    my $standings = get_standings shift;
 
     for my $summoner (@$standings) {
         # Calculate the points difference per summoner
@@ -104,13 +110,35 @@ sub standings {
         # Convert strings to numbers for table sorting
         $summoner->{$_} += 0.0 for qw/splits won tied lost pf pa pd/;
     }
-
     return $standings;
+}
+
+sub get_summoners {
+    my ($split_clause, @params) = filter_split_clause shift;
+    return $dbh->selectall_arrayref(qq{
+        SELECT DISTINCT s.id, name
+        FROM summoner s
+            JOIN matchup m ON s.id IN (summoner1, summoner2)
+            JOIN result r USING (split, week)
+        WHERE $split_clause
+        ORDER BY s.id
+    }, { Slice => {} }, @params);
+}
+
+sub get_weeks {
+    my ($split_clause, @params) = filter_split_clause shift;
+    return $dbh->selectcol_arrayref(qq{
+        SELECT DISTINCT CONCAT("S", split, " W", week)
+        FROM result
+        WHERE $split_clause
+        GROUP BY split, week
+        ORDER BY split, week
+    }, {}, @params);
 }
 
 sub data_series {
     my ($metric, $split_id, %params) = @_;
-    my $splits = splits;
+    my $splits = get_splits;
 
     # Data configuration
     $params{aggregation}    ||= 'cumulative';
@@ -119,32 +147,8 @@ sub data_series {
 
     # Ensure metric is valid
     $METRICS{$metric} or $metric = $DEFAULT_METRIC;
-    
-    # Filter by split if provided and valid
-    my ($filter_split_sql, @params) = ('1');
-    $split_id = 0 unless (defined $split_id and (grep {$_->{id} == $split_id} @$splits));
-    if ($split_id != 0) {
-        $filter_split_sql = 'split = ?';
-        push @params, $split_id;
-    }
 
-    my $summoners = $dbh->selectall_arrayref(qq{
-        SELECT DISTINCT s.id, name
-        FROM summoner s
-            JOIN matchup m ON s.id IN (summoner1, summoner2)
-            JOIN result r USING (split, week)
-        WHERE $filter_split_sql
-        ORDER BY s.id
-    }, { Slice => {} }, @params);
-
-    my $weeks = $dbh->selectcol_arrayref(qq{
-        SELECT DISTINCT CONCAT("S", split, " W", week)
-        FROM result
-        WHERE $filter_split_sql
-        GROUP BY split, week
-        ORDER BY split, week
-    }, {}, @params);
-
+    my ($split_clause, @params) = filter_split_clause $split_id;
     my $data = $dbh->selectall_hashref(qq{
         SELECT s.id, s.name, split, week, games,
             IF ((r1.score > r2.score AND summoner1 = s.id) OR (r2.score > r1.score AND summoner2 = s.id), 1, 0) won,
@@ -157,11 +161,14 @@ sub data_series {
             JOIN matches n USING (split, week)
             JOIN result r1 USING (split, week)
             JOIN result r2 USING (split, week)
-        WHERE $filter_split_sql
+        WHERE $split_clause
             AND r1.summoner = m.summoner1
             AND r2.summoner = m.summoner2
         ORDER BY id, split, week
     }, [qw/split week id/], {}, @params);
+
+    my $weeks       = get_weeks $split_id;
+    my $summoners   = get_summoners $split_id;
     
     # Initialise results hash
     my %results     = ();
