@@ -42,7 +42,7 @@ sub metric_name {
 
 sub default_params {
     my $metric = shift;
-    if ($metric =~ /pf|pa|pd/) {
+    if (can_normalise($metric)) {
         return (
             aggregation    => 'raw',
             normalise      => 'true',

@@ -15,7 +15,7 @@ app.controller('ChartCtrl', function($scope, $attrs, $http) {
     $scope.aggregation   = $attrs.aggregation;
     $scope.normalise     = $attrs.normalise == 'true';
     $scope.movingAverage = parseInt($attrs.movingAverage);
-    $scope.canNormalise =  $.inArray($attrs.metric, ['pf', 'pa', 'pd']) >= 0;
+    $scope.showControls  = $.inArray($attrs.metric, ['pf', 'pa', 'pd']) >= 0;
 
     $scope.reloadGraph = function() {
         var api_url = '/api/' + $attrs.metric + '/' + $attrs.split + '?' + [
@@ -23,7 +23,6 @@ app.controller('ChartCtrl', function($scope, $attrs, $http) {
             'n=' + $scope.normalise,
             'm=' + $scope.movingAverage,
         ].join('&');
-        console.log(api_url);
 
         $http.get(api_url)
             .success(function(response) {

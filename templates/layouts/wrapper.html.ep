@@ -46,7 +46,7 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li class="dropdown-header">Match Counts</li>
                                 <li class="<%= 'active' if ($page eq 'graph/won') %>" ><a href="/graph/won/<%= $split %>" >Match Wins</a></li>
-                                <li class="<%= 'active' if ($page eq 'graph/tied') %>"><a href="/graph/tied/<%= $split %>">Match Ties</a></li>
+                                <!--<li class="<%= 'active' if ($page eq 'graph/tied') %>"><a href="/graph/tied/<%= $split %>">Match Ties</a></li>-->
                                 <li class="<%= 'active' if ($page eq 'graph/lost') %>"><a href="/graph/lost/<%= $split %>">Match Losses</a></li>
                                 <li class="divider"></li>
                                 <li class="dropdown-header">Points Totals</li>

@@ -7,11 +7,11 @@
                 moving-average="<%= $moving_average %>"
                 >
 
-                <div class="well well--params">
+                <div class="well well--params" ng-show="showControls">
                     <span class="caret indicator"></span>
                     <p class="caption"><a data-toggle="collapse" href="#params">Graph Parameters</a></p>
                     <div class="collapse" id="params">
-                        <div class="checkbox" ng-show="canNormalise">
+                        <div class="checkbox">
                             <label>
                                 <input type="checkbox" ng-model="normalise"> Normalise values
                             </label>
