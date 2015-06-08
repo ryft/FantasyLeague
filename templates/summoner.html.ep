@@ -1,5 +1,5 @@
 %layout 'wrapper';
-            <div ng-controller="SummonerCtrl" summoner="<%= $summoner %>" split="<%= $split %>" ng-init="levelColors=['#FFF']">
+            <div ng-controller="SummonerCtrl" summoner="<%= $summoner %>" split="<%= $split %>" ng-init="levelColors=['#ffffff']">
 
                 <h2>{{ entity.name }}</h2>
 
@@ -8,13 +8,12 @@
                         <div class="card-content">
                             <justgage
                                 value="68"
-                                value-font-color="#FFF"
+                                value-font-color="#ffffff"
                                 hide-min-max="true"
                                 gauge-color="#95a5a6"
                                 hide-inner-shadow="true"
                                 level-colors="{{ levelColors }}"
                                 symbol="%"
-                                height="100"
                                 ></justgage>
                             <h4>Win Ratio</h4>
                         </div>
@@ -28,8 +27,8 @@
                     <div class="col-md-4 stat-card">
                         <div class="card-content">
                             <canvas id="line" class="chart chart-line" data="[[1, 2, 1, 3]]"
-                                labels="[]" legend="false" colours: ['#FFF']
-                                options="{ scaleShowLabels: false }">
+                                labels="['', '', '', '']" legend="false" colours: ['#ffffff']
+                                options="{ scaleShowLabels: false, bezierCurve: false }">
                             </canvas>
                             <h4>Rank Over Time</h4>
                         </div>

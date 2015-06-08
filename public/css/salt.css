@@ -44,23 +44,34 @@
 
 .stat-card {
     text-align: center;
-    min-height: 200px;
+    padding: 10px;
 }
 
 .stat-card .card-content {
     height: 180px;
     background: #2c3e50;
     border-radius: 4px;
-    margin: 10px;
+    padding: auto 24px;
     color: #ffffff;
 }
 
 .stat-card h4 {
+    text-align: right;
     font-style: italic;
+    color: #ffffff;
     position: absolute;
-    bottom: 8px;
-    right: 36px;
-    color: #ffffff
+    bottom: 10px;
+    right: 24px;
+}
+
+.stat-card svg {
+    margin: -16px auto;
+}
+
+.stat-card canvas {
+    margin-top: 24px;
+    width: 300px !important;
+    height: 120px !important;
 }
 
 justgage tspan {
