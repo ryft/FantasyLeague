@@ -42,3 +42,28 @@
     background: #18bc9c;
 }
 
+.stat-card {
+    text-align: center;
+    min-height: 200px;
+}
+
+.stat-card .card-content {
+    height: 180px;
+    background: #2c3e50;
+    border-radius: 4px;
+    margin: 10px;
+    color: #ffffff;
+}
+
+.stat-card h4 {
+    font-style: italic;
+    position: absolute;
+    bottom: 8px;
+    right: 36px;
+    color: #ffffff
+}
+
+justgage tspan {
+    font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+

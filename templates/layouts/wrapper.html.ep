@@ -19,8 +19,8 @@
         <script src="/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
         <script src="/angular-bootstrap-slider/slider.js"></script>
         <script src="/raphael/raphael-min.js"></script>
-        <script src="/justgage-toorshia/justgage.js"></script>
-        <script src="/angular-justgage/ng-justgage.js"></script>
+        <script src="/justgage-bower/justgage.js"></script>
+        <script src="/angular-gage/dist/angular-gage.min.js"></script>
         <script src="/js/salt.js"></script>
     </head>
     <body>

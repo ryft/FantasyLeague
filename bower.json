@@ -21,9 +21,10 @@
     "angular-chart.js": "~0.7.1",
     "bootswatch": "~3.3.4+1",
     "angular-bootstrap-slider": "~0.1.3",
-    "angular-justgage": "~1.0.1"
+    "angular-gage": "~0.0.2"
   },
   "resolutions": {
-    "angular": "~1.4.0"
+    "angular": "~1.4.0",
+    "raphael": "~2.1.2"
   }
 }

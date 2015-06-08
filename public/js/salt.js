@@ -1,4 +1,4 @@
-var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider', 'ngJustGage']);
+var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider', 'frapontillo.gage']);
 
 app.controller('MetaCtrl', function($scope, $http) {
     $http.get('/api/entities/0').success(function(response) {
@@ -37,6 +37,8 @@ app.controller('ResultsCtrl', function($scope, $attrs, $http) {
 });
 
 app.controller('SummonerCtrl', function($scope, $attrs, $http) {
+    $scope.gaugeColours = ['#ffffff'];
+    Chart.defaults.global.colours = ['#ffffff'];
     $http.get('/api/entities/' + $attrs.split).success(function(response) {
         $scope.entity = jQuery.grep(response, function(e) { return (e.id == $attrs.summoner) }).pop();
     });
