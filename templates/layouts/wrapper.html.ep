@@ -18,10 +18,13 @@
         <script src="/angular-chart.js/dist/angular-chart.min.js"></script>
         <script src="/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
         <script src="/angular-bootstrap-slider/slider.js"></script>
+        <script src="/raphael/raphael-min.js"></script>
+        <script src="/justgage-toorshia/justgage.js"></script>
+        <script src="/angular-justgage/ng-justgage.js"></script>
         <script src="/js/salt.js"></script>
     </head>
     <body>
-        <nav class="navbar navbar-static-top navbar-default">
+        <nav ng-controller="MetaCtrl" class="navbar navbar-static-top navbar-default">
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -39,7 +42,7 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Summoners <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="#">kek</a></li>
+                                <li ng-repeat="s in summoners"><a href="/summoner/{{ s.id }}/<%= $split %>">{{ s.name }}</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">

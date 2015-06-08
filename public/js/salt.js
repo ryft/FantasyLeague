@@ -1,40 +1,45 @@
-var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider']);
+var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider', 'ngJustGage']);
+
+app.controller('MetaCtrl', function($scope, $http) {
+    $http.get('/api/entities/0').success(function(response) {
+        $scope.summoners = response;
+    });
+});
 
 app.controller('StandingsCtrl', function($scope, $attrs, $http) {
-    $http.get('/api/standings/' + $attrs.split)
-        .success(function(response) {
-            $scope.standings = response;
-            $scope.predicate = '[splits, won, tied, pf, pa]';
-            $scope.reverse   = true;
-        }
-    );
+    $http.get('/api/standings/' + $attrs.split).success(function(response) {
+        $scope.standings = response;
+        $scope.predicate = '[splits, won, tied, pf, pa]';
+        $scope.reverse   = true;
+    });
 });
 
 app.controller('ResultsCtrl', function($scope, $attrs, $http) {
     $scope.entities = [];
 
-    $http.get('/api/entities/' + $attrs.split)
-        .success(function(response) {
-            $scope.entities = response;
-            $scope.entities.forEach(function(e) {
-                e.selected = true;
-            });
-        }
-    );
+    $http.get('/api/entities/' + $attrs.split).success(function(response) {
+        $scope.entities = response;
+        $scope.entities.forEach(function(e) {
+            e.selected = true;
+        });
+    });
 
     $scope.reloadData = function() {
         var api_url = '/api/results/' + $attrs.split + '?e='
             + $scope.entities.filter(function(e) { return e.selected })
                 .map(function(e) { return e.id }).join(',');
-        console.log(api_url);
-        $http.get(api_url)
-            .success(function(response) {
-                $scope.results = response;
-            }
-        );
+        $http.get(api_url).success(function(response) {
+            $scope.results = response;
+        });
     };
 
     $scope.$watch('entities', $scope.reloadData, true);
+});
+
+app.controller('SummonerCtrl', function($scope, $attrs, $http) {
+    $http.get('/api/entities/' + $attrs.split).success(function(response) {
+        $scope.entity = jQuery.grep(response, function(e) { return (e.id == $attrs.summoner) }).pop();
+    });
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
@@ -50,13 +55,11 @@ app.controller('ChartCtrl', function($scope, $attrs, $http) {
             'm=' + $scope.movingAverage,
         ].join('&');
 
-        $http.get(api_url)
-            .success(function(response) {
-                $scope.labels = response.labels;
-                $scope.series = response.series;
-                $scope.data   = response.data;
-            }
-        );
+        $http.get(api_url).success(function(response) {
+            $scope.labels = response.labels;
+            $scope.series = response.series;
+            $scope.data   = response.data;
+        });
     };
 
     $scope.$watchGroup(['aggregation', 'normalise'], $scope.reloadGraph);

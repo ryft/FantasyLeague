@@ -123,7 +123,7 @@ sub get_results {
     $split_clause .= qq{
             AND summoner1 IN ($placeholders)
             AND summoner2 IN ($placeholders)
-    } if (@_);
+    } if (@entity_array);
     push @params, (@entity_array, @entity_array);
 
     return $dbh->selectall_arrayref(qq{
@@ -294,9 +294,10 @@ sub data_series {
 
 # Prepare UI routes
 get '/' => sub { my $c = shift; $c->redirect_to('standings/0') };
-get '/standings/:split' => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
-get '/results/:split'   => sub { my $c = shift; $c->stash(page => 'results');   $c->render(template => 'results') };
-get '/graph/:metric/:split' => sub {
+get '/summoner/:summoner/:split'    => sub { my $c = shift; $c->stash(page => 'summoner/' . $c->param('summoner'));  $c->render(template => 'summoner') };
+get '/standings/:split'             => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
+get '/results/:split'               => sub { my $c = shift; $c->stash(page => 'results');   $c->render(template => 'results') };
+get '/graph/:metric/:split'         => sub {
     my $c = shift;
     my $metric = metric($c->param('metric'));
     $c->stash(
