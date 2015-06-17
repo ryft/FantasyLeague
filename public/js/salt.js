@@ -46,6 +46,7 @@ app.controller('SummonerCtrl', function($scope, $attrs, $http) {
         $scope.head_to_heads = response.head_to_heads;
         $scope.final_rank = response.final_rank;
         $scope.win_ratio = response.win_ratio;
+        $scope.players = response.players;
         $scope.labels = response.labels;
         $scope.ranks = [response.ranks];
     });

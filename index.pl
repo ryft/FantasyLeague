@@ -278,6 +278,7 @@ sub summoner {
 
     my %accumulated  = ();
     my $current_rank = 0;
+    my $players = 0;
     for my $split_id (sort {$a<=>$b} keys %res_by_week) {
         my $split = $res_by_week{$split_id};
         for my $week_id (sort {$a<=>$b} keys %$split) {
@@ -287,8 +288,10 @@ sub summoner {
                 $accumulated{$summ_id}->{$_} += $matchup->{$_} for (keys %$matchup);
             }
             my @ranking   = calculate_ranking(%accumulated);
+            $players      = @ranking;
             $current_rank = 1 + first_index { $_ == $summoner } @ranking;
-            push @ranks, @ranking - $current_rank;
+            $current_rank = $players if ($current_rank == 0);
+            push @ranks, $players - $current_rank;
         }
     }
 
@@ -301,6 +304,7 @@ sub summoner {
     return {
         ranks => \@ranks,
         labels => [map {''} @ranks],
+        players => $players,
         win_ratio => $total_won / ($total_won + $total_lost) * 100,
         final_rank => $current_rank,
         head_to_heads => [values %head_to_heads],
