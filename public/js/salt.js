@@ -42,6 +42,13 @@ app.controller('SummonerCtrl', function($scope, $attrs, $http) {
     $http.get('/api/entities/' + $attrs.split).success(function(response) {
         $scope.entity = jQuery.grep(response, function(e) { return (e.id == $attrs.summoner) }).pop();
     });
+    $http.get('/api/summoner/' + $attrs.summoner + '/' + $attrs.split).success(function(response) {
+        $scope.head_to_heads = response.head_to_heads;
+        $scope.final_rank = response.final_rank;
+        $scope.win_ratio = response.win_ratio;
+        $scope.labels = response.labels;
+        $scope.ranks = [response.ranks];
+    });
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {

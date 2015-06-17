@@ -45,6 +45,7 @@
 .stat-card {
     text-align: center;
     padding: 10px;
+    height: 200px;
 }
 
 .stat-card .card-content {

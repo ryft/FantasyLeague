@@ -7,33 +7,65 @@
                     <div class="col-md-4 stat-card">
                         <div class="card-content">
                             <justgage
-                                value="68"
+                                value="{{ win_ratio }}"
                                 value-font-color="#ffffff"
                                 hide-min-max="true"
                                 gauge-color="#95a5a6"
                                 hide-inner-shadow="true"
                                 level-colors="{{ levelColors }}"
                                 symbol="%"
+                                counter="true"
                                 ></justgage>
                             <h4>Win Ratio</h4>
                         </div>
                     </div>
                     <div class="col-md-4 stat-card">
                         <div class="card-content">
-                            <p style="font-size: 108px;">1</p>
+                            <p style="font-size: 108px;">{{ final_rank }}</p>
                             <h4>Current Rank</h4>
                         </div>
                     </div>
                     <div class="col-md-4 stat-card">
                         <div class="card-content">
-                            <canvas id="line" class="chart chart-line" data="[[1, 2, 1, 3]]"
-                                labels="['', '', '', '']" legend="false" colours: ['#ffffff']
-                                options="{ scaleShowLabels: false, bezierCurve: false }">
+                            <canvas id="line" class="chart chart-line" data="ranks"
+                                labels="labels" legend="false" colours: ['#ffffff']
+                                options="{
+                                    scaleShowLabels: false,
+                                    scaleShowGridLines: false,
+                                    pointDotRadius: 1,
+                                    datasetFill: false,
+                                    showTooltips: false,
+                                    }">
                             </canvas>
                             <h4>Rank Over Time</h4>
                         </div>
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3>Head to Head Matchups</h3>
+                        <table class="table" style="width: auto;">
+                            <thead>
+                                <tr>
+                                    <th>Summoner</th><!-- TODO: or team -->
+                                    <th>Wins</th>
+                                    <th>Losses</th>
+                                    <th>Points Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="r in head_to_heads">
+                                    <td>{{ r.name }}</td>
+                                    <td>{{ (r.won  | number)   || 0 }}</td>
+                                    <td>{{ (r.lost | number)   || 0 }}</td>
+                                    <td>{{ (r.pd   | number:2) || 0 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4 stat-card">
+                    </div>
+                </div>
             </div>
 

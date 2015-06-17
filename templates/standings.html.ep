@@ -4,20 +4,20 @@
             <table ng-controller="StandingsCtrl" split="<%= $split %>" class="table">
                 <thead>
                     <tr>
-                        <th><a href="" ng-click="predicate='name';    reverse=!reverse">Summoner</a></th>
+                        <th><span href="" ng-click="predicate='name';    reverse=!reverse">Summoner</span></th>
                     % if ($split == 0) {
-                        <th><a href="" ng-click="predicate='splits';  reverse=!reverse">Splits</a></th>
+                        <th><span href="" ng-click="predicate='splits';  reverse=!reverse">Splits</span></th>
                     % }
-                        <th><a href="" ng-click="predicate='won';     reverse=!reverse">Wins</a></th>
-                        <th><a href="" ng-click="predicate='tied';    reverse=!reverse">Ties</a></th>
-                        <th><a href="" ng-click="predicate='lost';    reverse=!reverse">Losses</a></th>
-                        <th><a href="" ng-click="predicate='pf';      reverse=!reverse">Points For</a></th>
-                        <th><a href="" ng-click="predicate='pa';      reverse=!reverse">Points Against</a></th>
-                        <th><a href="" ng-click="predicate='pd';      reverse=!reverse">Points Difference</a></th>
+                        <th><span href="" ng-click="predicate='won';     reverse=!reverse">Wins</span></th>
+                        <th><span href="" ng-click="predicate='tied';    reverse=!reverse">Ties</span></th>
+                        <th><span href="" ng-click="predicate='lost';    reverse=!reverse">Losses</span></th>
+                        <th><span href="" ng-click="predicate='pf';      reverse=!reverse">Points For</span></th>
+                        <th><span href="" ng-click="predicate='pa';      reverse=!reverse">Points Against</span></th>
+                        <th><span href="" ng-click="predicate='pd';      reverse=!reverse">Points Difference</span></th>
                     </tr>
                 <thead>
                 <tbody>
-                    <tr ng-repeat="s in standings | orderBy:predicate:reverse">
+                    <tr ng-repeat="s in standings"><!-- | orderBy:predicate:reverse -->
                         <td>{{ s.name }}</td>
                     % if ($split == 0) {
                         <td>{{ s.splits     | number }}</td>
