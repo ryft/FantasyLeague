@@ -415,7 +415,8 @@ sub data_series {
 }
 
 # Prepare UI routes
-get '/' => sub { my $c = shift; $c->redirect_to('standings/0') };
+get '/'      => sub { my $c = shift; $c->redirect_to('standings/0') };
+get '/login' => sub { my $c = shift; $c->stash(page => 'login', split => 0); $c->render(template => 'login') };
 get '/summoner/:summoner/:split'    => sub { my $c = shift; $c->stash(page => 'summoner/' . $c->param('summoner'));  $c->render(template => 'summoner') };
 get '/standings/:split'             => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 get '/results/:split'               => sub { my $c = shift; $c->stash(page => 'results');   $c->render(template => 'results') };
