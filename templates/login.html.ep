@@ -1,17 +1,17 @@
 %layout 'wrapper';
-
-            <h2>Restricted Content</h2>
-            <div class="well" style="width: auto; max-width: 500px; margin: auto">
+            <div class="well" style="width: auto; max-width: 500px; margin: 40px auto">
                 <form method="POST" action="/login" class="form">
                     <div class="form-group">
                         <label for="username">Summoner Name</label>
-                        <input type="text" class="form-control" id="username" placeholder="Teemo">
+                        <input type="text" name="username" class="form-control" id="username" placeholder="Teemo">
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Mushroom">
+                        <input type="password" name="password" class="form-control" id="password" placeholder="Mushroom">
                     </div>
-                    <button type="submit" class="btn btn-default">Log In</button>
+                    <div style="text-align: right">
+                        <button type="submit" class="btn btn-default">Log In</button>
+                    </div>
                 </form>
             </div>
 

@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 
-use Data::Dump qw/dump/;
 use DBI;
 use List::MoreUtils qw/first_index/;
 use List::Util qw/sum/;
@@ -11,6 +10,15 @@ use Readonly;
 use YAML::XS qw/LoadFile/;
 
 use Mojolicious::Lite;
+use Mojolicious::Plugin::Authentication;
+
+plugin 'SimpleFileAuth';
+plugin 'Authentication' => {
+    'autoload_user' => 1,
+    'session_key' => 'salt',
+    'load_user' => sub { shift->load_file_user(@_) },
+    'validate_user' => sub { shift->validate_file_user(@_) },
+};
 
 Readonly my $CONFIG => 'config.yaml';
 Readonly my $DEFAULT_METRIC => 'won';
@@ -414,9 +422,26 @@ sub data_series {
     };
 }
 
+# Prepare unauthenticated routes
+get '/logout' => sub { my $c = shift; $c->logout; $c->redirect_to('/') };
+get '/login'  => sub { my $c = shift; $c->stash(page => 'login', split => 0); $c->render(template => 'login') };
+post '/login' => sub {
+    my $c = shift;
+    if ($c->authenticate($c->param('username'), $c->param('password'))) {
+        $c->redirect_to('/');
+    } else {
+        $c->stash(page => 'login', split => 0); $c->render(template => 'login');
+    }
+};
+
+under sub {
+    my $c = shift;
+    return 1 if $c->is_user_authenticated;
+    $c->redirect_to('login');
+};
+
 # Prepare UI routes
-get '/'      => sub { my $c = shift; $c->redirect_to('standings/0') };
-get '/login' => sub { my $c = shift; $c->stash(page => 'login', split => 0); $c->render(template => 'login') };
+get '/'                             => sub { my $c = shift; $c->redirect_to('standings/0') };
 get '/summoner/:summoner/:split'    => sub { my $c = shift; $c->stash(page => 'summoner/' . $c->param('summoner'));  $c->render(template => 'summoner') };
 get '/standings/:split'             => sub { my $c = shift; $c->stash(page => 'standings'); $c->render(template => 'standings') };
 get '/results/:split'               => sub { my $c = shift; $c->stash(page => 'results');   $c->render(template => 'results') };
