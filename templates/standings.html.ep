@@ -1,4 +1,8 @@
 %layout 'wrapper';
+            <div class="well">
+                %= include 'intro'
+            </div>
+
             <h2>Standings</h2>
 
             <table ng-controller="StandingsCtrl" split="<%= $split %>" class="table">
