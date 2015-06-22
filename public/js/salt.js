@@ -1,4 +1,4 @@
-var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider', 'frapontillo.gage']);
+var app = angular.module('SaltApp', ['chart.js', 'ui.bootstrap-slider', 'frapontillo.gage', 'xeditable']);
 
 app.controller('MetaCtrl', function($scope, $http) {
     $http.get('/api/entities/0').success(function(response) {
@@ -50,6 +50,13 @@ app.controller('SummonerCtrl', function($scope, $attrs, $http) {
         $scope.labels = response.labels;
         $scope.ranks = [response.ranks];
     });
+    $scope.updateTeamName = function(name) {
+        var prevName = $scope.entity.name;
+        console.log("Updating " + $attrs.split + " from " + prevName + " to " + name);
+        $http.post('/api/updateTeam/' + $attrs.split, JSON.stringify({
+            summoner: $scope.entity.id, name: name
+        })).error(function() { $scope.entity.name = prevName });
+    };
 });
 
 app.controller('ChartCtrl', function($scope, $attrs, $http) {
@@ -73,5 +80,9 @@ app.controller('ChartCtrl', function($scope, $attrs, $http) {
     };
 
     $scope.$watchGroup(['aggregation', 'normalise'], $scope.reloadGraph);
+});
+
+app.run(function(editableOptions) {
+      editableOptions.theme = 'bs3';
 });
 

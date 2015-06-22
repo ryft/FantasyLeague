@@ -4,8 +4,9 @@ use strict;
 use warnings;
 
 use DBI;
+use JSON qw/from_json/;
 use List::MoreUtils qw/first_index/;
-use List::Util qw/sum/;
+use List::Util qw/max sum/;
 use Readonly;
 use YAML::XS qw/LoadFile/;
 
@@ -311,9 +312,9 @@ sub summoner {
 
     return {
         ranks => \@ranks,
-        labels => [map {''} @ranks],
+        labels => [('') x @ranks],
         players => $players,
-        win_ratio => $total_won / ($total_won + $total_lost) * 100,
+        win_ratio => $total_won / max(($total_won + $total_lost) * 100, 1),
         final_rank => $current_rank,
         head_to_heads => [values %head_to_heads],
     };
@@ -476,6 +477,21 @@ get '/api/:metric/:split'   => sub {
         normalise      => $c->param('n'),
         moving_average => $c->param('m'),
     ));
+};
+
+post '/api/updateTeam/:split' => sub {
+    my $c = shift;
+    my $params = from_json $c->req->body;
+
+    if ($params->{summoner} != $c->current_user->{id}) {
+        $c->render(json => { Error => 'Only your own team name may be edited' });
+    } elsif ($c->param('split') != 3) {
+        $c->render(json => { Error => 'Only the current team name may be edited' });
+    } else {
+        $dbh->do(q{ UPDATE team SET name = ? WHERE summoner = ? AND split = ? },
+            undef, $params->{name}, $params->{summoner}, $c->param('split'));
+        $c->render(json => { Success => 1 });
+    }
 };
 
 app->secrets($config->{secrets});

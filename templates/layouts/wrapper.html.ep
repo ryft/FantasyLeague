@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="/bootswatch/flatly/bootstrap.min.css">
         <link rel="stylesheet" href="/angular-chart.js/dist/angular-chart.css">
         <link rel="stylesheet" href="/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css">
+        <link rel="stylesheet" href="/angular-xeditable/dist/css/xeditable.css">
         <link rel="stylesheet" href="/css/salt.css">
         
         <script src="/angular/angular.min.js"></script>
@@ -22,6 +23,7 @@
         <script src="/raphael/raphael-min.js"></script>
         <script src="/justgage-bower/justgage.js"></script>
         <script src="/angular-gage/dist/angular-gage.min.js"></script>
+        <script src="/angular-xeditable/dist/js/xeditable.js"></script>
         <script src="/js/salt.js"></script>
     </head>
     <body>
