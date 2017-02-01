@@ -14,7 +14,7 @@
 
                 <h2>Results</h2>
 
-                <table class="table">
+                <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
                         % if ($split == 0) {

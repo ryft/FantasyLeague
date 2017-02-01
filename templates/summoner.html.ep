@@ -1,7 +1,7 @@
 %layout 'wrapper';
             <div ng-controller="SummonerCtrl" summoner="<%= $summoner %>" split="<%= $split %>" ng-init="levelColors=['#ffffff']">
 
-            % if ($split == 3 and $summoner == current_user->{id}) {
+            % if ($split == 3 and is_user_authenticated() and $summoner == current_user()->{id}) {
                 <h2><a href="#" editable-text="entity.name" onbeforesave="updateTeamName($data)" ng-bind="entity.name"></a></h2>
             % } else {
                 <h2 ng-bind="entity.name">{{ entity.name }}</h2>
@@ -47,9 +47,9 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-12">
                         <h3>Head to Head Matchups</h3>
-                        <table class="table" style="width: auto;">
+                        <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Summoner</th><!-- TODO: or team -->
@@ -67,8 +67,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="col-md-4 stat-card">
                     </div>
                 </div>
             </div>

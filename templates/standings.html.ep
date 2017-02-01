@@ -5,7 +5,7 @@
 
             <h2>Standings</h2>
 
-            <table ng-controller="StandingsCtrl" split="<%= $split %>" class="table">
+            <table ng-controller="StandingsCtrl" split="<%= $split %>" class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th><span href="" ng-click="predicate='name';    reverse=!reverse">Summoner</span></th>

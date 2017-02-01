@@ -1,0 +1,8 @@
+mysql:
+    database: salt
+    username: 
+    password: 
+
+secrets:
+  - 
+

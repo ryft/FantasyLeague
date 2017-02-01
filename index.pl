@@ -106,8 +106,9 @@ sub get_standings {
 }
 
 sub standings {
+    my $split     = shift;
     my $splits    = get_splits;
-    my $standings = get_standings shift;
+    my $standings = get_standings $split;
 
     for my $summoner (@$standings) {
         # Calculate the points difference per summoner
@@ -117,13 +118,18 @@ sub standings {
         # Convert strings to numbers for table sorting
         $summoner->{$_} += 0.0 for qw/splits won tied lost pf pa pd/;
     }
-    return [ sort {
-        $b->{splits} <=> $a->{splits}
-     || $b->{won}    <=> $a->{won}
-     || $b->{tied}   <=> $a->{tied}
-     || $b->{pf}     <=> $a->{pf}
-     || $b->{pa}     <=> $a->{pa}
-    } @$standings ];
+
+    if ($split) {
+        return [ sort {
+            $b->{won}    <=> $a->{won} || $b->{tied}   <=> $a->{tied}
+         || $b->{pf}     <=> $a->{pf}  || $b->{pa}     <=> $a->{pa}
+        } @$standings ];
+    } else {
+        return [ sort { $b->{splits} <=> $a->{splits}
+         || $b->{won}    <=> $a->{won} || $b->{tied}   <=> $a->{tied}
+         || $b->{pf}     <=> $a->{pf}  || $b->{pa}     <=> $a->{pa}
+        } @$standings ];
+    }
 }
 
 sub get_results {
@@ -314,7 +320,7 @@ sub summoner {
         ranks => \@ranks,
         labels => [('') x @ranks],
         players => $players,
-        win_ratio => $total_won / max(($total_won + $total_lost) * 100, 1),
+        win_ratio => $total_won / max($total_won + $total_lost, 1) * 100,
         final_rank => $current_rank,
         head_to_heads => [values %head_to_heads],
     };
@@ -424,7 +430,7 @@ sub data_series {
 }
 
 # Prepare unauthenticated routes
-get '/logout' => sub { my $c = shift; $c->logout; $c->redirect_to('/') };
+get '/logout' => sub { my $c = shift; $c->logout; $c->session(expires => 1); $c->redirect_to('/') };
 get '/login'  => sub { my $c = shift; $c->stash(page => 'login', split => 0); $c->render(template => 'login') };
 post '/login' => sub {
     my $c = shift;
